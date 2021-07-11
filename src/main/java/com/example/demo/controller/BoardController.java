@@ -4,22 +4,42 @@ import com.example.demo.domain.BoardVO;
 import com.example.demo.domain.ResultVO;
 import com.example.demo.persistence.BoardMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.*;
 
+
+import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api")
 public class BoardController {
     private final BoardMapper boardMapper;
-
     @PostMapping("/board")
     public ResultVO addBoard(@RequestBody BoardVO boardVO) {
         int result = boardMapper.insertBoard(boardVO);
         if (result > 0) {
+            return new ResultVO(0, "success");
+        } else {
+            return new ResultVO(100, "fail");
+        }
+    }
+    @GetMapping("/board/{id}")
+    public BoardVO findOne(@PathVariable int id) {
+        return boardMapper.findOneBoard(id);
+    }
+    @GetMapping("/boards")
+    public List<BoardVO> findAllBoard(@RequestParam @Nullable Integer page_number, @RequestParam @Nullable Integer page_size) {
+        Integer offset = null;
+        if (page_number != null && page_size != null) {
+            offset = (page_number - 1) * page_size;
+        }
+        return boardMapper.findBoard(offset, page_size);
+    }
+
+    @PutMapping("/board")
+    public ResultVO modifyBoard(@RequestBody BoardVO boardVO) {
+        int result = boardMapper.updateBoard(boardVO);
+        if ( result > 0) {
             return new ResultVO(0, "success");
         } else {
             return new ResultVO(100, "fail");
